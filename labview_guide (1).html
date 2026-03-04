@@ -1,0 +1,1282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LabVIEW + K6221 Visual Guide</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;700;800&display=swap');
+
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #1c2230;
+    --border: #30363d;
+    --accent: #f0b429;
+    --accent2: #58a6ff;
+    --accent3: #3fb950;
+    --accent4: #ff7b72;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --lv-bg: #d4e4f7;
+    --lv-panel: #c8d8ed;
+    --lv-ctrl: #f5f5f5;
+    --lv-border: #8a9ab8;
+    --lv-accent: #003b6f;
+    --lv-wire-orange: #e87722;
+    --lv-wire-blue: #2060c0;
+    --lv-wire-green: #228b22;
+    --lv-wire-pink: #cc44aa;
+    --lv-node: #e8e0a8;
+    --lv-node2: #a8d8a8;
+    --lv-node3: #f0c8a0;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Syne', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+  }
+
+  /* HEADER */
+  .hero {
+    background: linear-gradient(135deg, #0d1117 0%, #1a2540 50%, #0d1117 100%);
+    border-bottom: 2px solid var(--accent);
+    padding: 40px 48px 32px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(240,180,41,0.12) 0%, transparent 70%);
+  }
+  .hero-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .hero h1 {
+    font-size: 36px;
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 8px;
+  }
+  .hero h1 span { color: var(--accent); }
+  .hero p { color: var(--muted); font-size: 15px; }
+
+  /* NAV PILLS */
+  .nav {
+    display: flex;
+    gap: 8px;
+    padding: 16px 48px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .nav-pill {
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-family: 'Syne', sans-serif;
+    transition: all 0.2s;
+  }
+  .nav-pill:hover { border-color: var(--accent); color: var(--accent); }
+  .nav-pill.active { background: var(--accent); color: #000; border-color: var(--accent); }
+
+  /* MAIN LAYOUT */
+  .container { max-width: 1200px; margin: 0 auto; padding: 40px 48px; }
+
+  /* STEP CARDS */
+  .step {
+    display: none;
+    animation: fadeIn 0.3s ease;
+  }
+  .step.active { display: block; }
+  @keyframes fadeIn { from { opacity:0; transform: translateY(8px); } to { opacity:1; transform: translateY(0); } }
+
+  .step-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .step-num {
+    width: 48px; height: 48px;
+    background: var(--accent);
+    color: #000;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; font-weight: 800;
+    flex-shrink: 0;
+  }
+  .step-title { font-size: 24px; font-weight: 700; }
+  .step-subtitle { color: var(--muted); font-size: 14px; }
+
+  /* LABVIEW MOCKUPS */
+  .lv-window {
+    border: 2px solid var(--lv-border);
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 20px 0;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .lv-titlebar {
+    background: linear-gradient(180deg, #4a7ab5 0%, #2d5a8e 100%);
+    padding: 5px 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: white;
+    font-weight: 600;
+  }
+  .lv-titlebar-btns { display: flex; gap: 4px; margin-left: auto; }
+  .lv-btn { width: 14px; height: 14px; border-radius: 3px; }
+  .lv-btn-close { background: #cc4444; }
+  .lv-btn-min { background: #ccaa00; }
+  .lv-btn-max { background: #44aa44; }
+
+  .lv-toolbar {
+    background: #e8e8e8;
+    border-bottom: 1px solid #bbb;
+    padding: 3px 6px;
+    display: flex;
+    gap: 4px;
+    align-items: center;
+  }
+  .lv-tool {
+    padding: 2px 8px;
+    font-size: 11px;
+    background: #d0d0d0;
+    border: 1px solid #aaa;
+    border-radius: 2px;
+    color: #333;
+    cursor: default;
+  }
+  .lv-tool.active { background: #b0c8e8; border-color: #4a7ab5; }
+
+  /* FRONT PANEL */
+  .lv-fp {
+    background: var(--lv-bg);
+    padding: 16px;
+    min-height: 400px;
+  }
+  .lv-fp-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .lv-cluster {
+    background: var(--lv-panel);
+    border: 2px solid var(--lv-border);
+    border-radius: 4px;
+    padding: 10px;
+  }
+  .lv-cluster-title {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--lv-accent);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid var(--lv-border);
+    padding-bottom: 4px;
+  }
+  .lv-control {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    gap: 8px;
+  }
+  .lv-label {
+    font-size: 10px;
+    color: #333;
+    flex: 1;
+  }
+  .lv-numeric {
+    background: #fff;
+    border: 1px solid #888;
+    padding: 2px 6px;
+    font-size: 11px;
+    color: #003b6f;
+    width: 70px;
+    text-align: right;
+    font-family: 'JetBrains Mono', monospace;
+    border-radius: 1px;
+  }
+  .lv-string-ctrl {
+    background: #ffffd0;
+    border: 1px solid #888;
+    padding: 2px 6px;
+    font-size: 10px;
+    color: #333;
+    width: 120px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .lv-enum-ctrl {
+    background: #fff;
+    border: 1px solid #888;
+    padding: 2px 6px;
+    font-size: 10px;
+    color: #003;
+    width: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .lv-led {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    border: 1px solid #666;
+    flex-shrink: 0;
+  }
+  .lv-led.green { background: radial-gradient(circle at 35% 35%, #88ff88, #228b22); }
+  .lv-led.red { background: radial-gradient(circle at 35% 35%, #ff8888, #aa2222); }
+  .lv-led.off { background: radial-gradient(circle at 35% 35%, #aaaaaa, #555555); }
+  .lv-led.orange { background: radial-gradient(circle at 35% 35%, #ffcc44, #cc8800); }
+
+  .lv-button {
+    background: linear-gradient(180deg, #e8e8e8 0%, #c8c8c8 100%);
+    border: 2px solid #888;
+    padding: 4px 16px;
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 3px;
+    color: #333;
+    cursor: pointer;
+    font-family: 'JetBrains Mono', monospace;
+    box-shadow: 1px 1px 0 #fff inset, -1px -1px 0 #666 inset;
+  }
+  .lv-button.run { background: linear-gradient(180deg, #88dd88 0%, #44aa44 100%); color: #003300; border-color: #228822; }
+  .lv-button.stop { background: linear-gradient(180deg, #ff8888 0%, #cc4444 100%); color: white; border-color: #882222; }
+
+  .lv-indicator {
+    background: #1a1a3a;
+    border: 1px solid #666;
+    padding: 2px 6px;
+    font-size: 10px;
+    color: #88ff88;
+    font-family: 'JetBrains Mono', monospace;
+    width: 120px;
+    border-radius: 1px;
+  }
+
+  /* BLOCK DIAGRAM */
+  .lv-bd {
+    background: #f0f0e8;
+    padding: 16px;
+    min-height: 500px;
+    position: relative;
+  }
+  .bd-svg {
+    width: 100%;
+    height: 520px;
+  }
+
+  /* ANNOTATIONS */
+  .annotation-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 20px 0;
+  }
+  .annotation {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent2);
+    border-radius: 6px;
+    padding: 14px;
+  }
+  .annotation.warn { border-left-color: var(--accent); }
+  .annotation.error { border-left-color: var(--accent4); }
+  .annotation.success { border-left-color: var(--accent3); }
+  .annotation-title {
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: var(--accent2);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .annotation.warn .annotation-title { color: var(--accent); }
+  .annotation.error .annotation-title { color: var(--accent4); }
+  .annotation.success .annotation-title { color: var(--accent3); }
+  .annotation p { font-size: 13px; color: var(--muted); }
+  .annotation code {
+    font-family: 'JetBrains Mono', monospace;
+    background: #0d1117;
+    padding: 1px 5px;
+    border-radius: 3px;
+    color: var(--accent);
+    font-size: 11px;
+  }
+
+  /* CODE BLOCK */
+  .code-block {
+    background: #0d1117;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    margin: 16px 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    line-height: 1.8;
+    overflow-x: auto;
+  }
+  .code-block .kw { color: #ff7b72; }
+  .code-block .fn { color: #d2a8ff; }
+  .code-block .str { color: #a5d6ff; }
+  .code-block .cm { color: #8b949e; font-style: italic; }
+  .code-block .num { color: #79c0ff; }
+  .code-block .var { color: #ffa657; }
+
+  /* WIRE LEGEND */
+  .wire-legend {
+    display: flex;
+    gap: 20px;
+    padding: 12px 16px;
+    background: var(--surface2);
+    border-radius: 6px;
+    margin: 12px 0;
+    flex-wrap: wrap;
+  }
+  .wire-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .wire-line {
+    width: 32px;
+    height: 4px;
+    border-radius: 2px;
+  }
+
+  /* CHECKLIST */
+  .checklist { margin: 16px 0; }
+  .check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+  }
+  .check-box {
+    width: 20px; height: 20px;
+    border: 2px solid var(--accent);
+    border-radius: 4px;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 1px;
+  }
+  .check-box.done { background: var(--accent3); border-color: var(--accent3); }
+  .check-box.done::after { content: '✓'; color: #000; font-size: 12px; font-weight: 700; }
+  .check-text { flex: 1; }
+  .check-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    background: var(--surface2);
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+
+  /* PROGRESS */
+  .progress-bar-wrap {
+    background: var(--surface2);
+    border-radius: 4px;
+    height: 6px;
+    margin: 8px 0 24px;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 4px;
+    transition: width 0.4s ease;
+  }
+
+  h3 { font-size: 16px; color: var(--accent2); margin: 20px 0 10px; }
+  h4 { font-size: 14px; color: var(--text); margin: 14px 0 6px; }
+  p { font-size: 14px; color: var(--muted); margin-bottom: 8px; }
+  ul { padding-left: 20px; }
+  li { font-size: 13px; color: var(--muted); margin-bottom: 4px; }
+
+  /* FLOW DIAGRAM */
+  .flow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin: 20px 0;
+    overflow-x: auto;
+    padding: 8px 0;
+  }
+  .flow-box {
+    background: var(--surface2);
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: center;
+    min-width: 90px;
+    flex-shrink: 0;
+    transition: border-color 0.2s;
+  }
+  .flow-box.active-state { border-color: var(--accent3); color: var(--accent3); }
+  .flow-box.init { border-color: var(--accent2); color: var(--accent2); }
+  .flow-box.stop-state { border-color: var(--accent4); color: var(--accent4); }
+  .flow-arrow {
+    color: var(--muted);
+    font-size: 18px;
+    padding: 0 4px;
+    flex-shrink: 0;
+  }
+
+  /* NI-MAX mockup */
+  .nimax {
+    background: #f0f0f0;
+    border: 2px solid #999;
+    border-radius: 4px;
+    overflow: hidden;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: #222;
+    margin: 16px 0;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  }
+  .nimax-title {
+    background: linear-gradient(180deg, #4488cc 0%, #2266aa 100%);
+    color: white;
+    padding: 5px 10px;
+    font-weight: 700;
+    font-size: 12px;
+  }
+  .nimax-body { display: flex; }
+  .nimax-tree {
+    background: #fff;
+    width: 200px;
+    border-right: 1px solid #bbb;
+    padding: 8px;
+  }
+  .nimax-item { padding: 3px 4px; cursor: pointer; }
+  .nimax-item:hover { background: #d8e8f8; }
+  .nimax-item.selected { background: #3377cc; color: white; }
+  .nimax-item.indent1 { padding-left: 16px; }
+  .nimax-item.indent2 { padding-left: 28px; }
+  .nimax-panel {
+    flex: 1;
+    padding: 12px;
+    background: #f8f8f8;
+  }
+  .nimax-idn-box {
+    background: #1a1a2a;
+    color: #88ff88;
+    padding: 10px;
+    font-size: 11px;
+    border-radius: 3px;
+    margin-top: 8px;
+  }
+
+  @media (max-width: 700px) {
+    .container { padding: 20px 16px; }
+    .hero { padding: 24px 16px; }
+    .nav { padding: 12px 16px; }
+    .lv-fp-grid { grid-template-columns: 1fr; }
+    .annotation-grid { grid-template-columns: 1fr; }
+    .flow { flex-wrap: wrap; justify-content: center; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-tag">Visual Step-by-Step Guide</div>
+  <h1>LabVIEW 2018 + <span>K6221</span><br>Python Node Integration</h1>
+  <p>Click each step below to see exactly how it looks and what to do</p>
+  <p style="margin-top:14px; font-family:'JetBrains Mono',monospace; font-size:12px; color:#f0b429; letter-spacing:2px; font-weight:600;">✦ Created by M H Babu ✦</p>
+</div>
+
+<div class="nav">
+  <button class="nav-pill active" onclick="showStep(0)">① NI-MAX Check</button>
+  <button class="nav-pill" onclick="showStep(1)">② Edit Python</button>
+  <button class="nav-pill" onclick="showStep(2)">③ Front Panel</button>
+  <button class="nav-pill" onclick="showStep(3)">④ Block Diagram</button>
+  <button class="nav-pill" onclick="showStep(4)">⑤ Python Node</button>
+  <button class="nav-pill" onclick="showStep(5)">⑥ Wire It Up</button>
+  <button class="nav-pill" onclick="showStep(6)">⑦ Run & Test</button>
+</div>
+
+<div class="container">
+
+<!-- ─────────────────── STEP 0: NI-MAX ─────────────────── -->
+<div class="step active" id="step0">
+  <div class="step-header">
+    <div class="step-num">1</div>
+    <div>
+      <div class="step-title">Verify Connection in NI-MAX</div>
+      <div class="step-subtitle">Do this BEFORE opening LabVIEW — confirm K6221 is reachable</div>
+    </div>
+  </div>
+
+  <div class="nimax">
+    <div class="nimax-title">NI Measurement &amp; Automation Explorer (NI-MAX)</div>
+    <div class="nimax-body">
+      <div class="nimax-tree">
+        <div class="nimax-item">📁 My System</div>
+        <div class="nimax-item indent1">⚙️ Devices and Interfaces</div>
+        <div class="nimax-item indent2 selected">🌐 Network Devices</div>
+        <div class="nimax-item indent2">  └ TCPIP0::192.168.0.2::1394</div>
+        <div class="nimax-item indent1">📊 Data Neighborhood</div>
+        <div class="nimax-item indent1">💾 File I/O</div>
+        <div class="nimax-item indent1">⚙️ Software</div>
+      </div>
+      <div class="nimax-panel">
+        <div style="font-weight:700;margin-bottom:8px;color:#1a1a6a">VISA TCP/IP Resource — Keithley 6221</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+          <div>
+            <div style="color:#555;font-size:10px">IP Address</div>
+            <div style="background:#fff;border:1px solid #aaa;padding:3px 6px;color:#003b6f">192.168.0.2</div>
+          </div>
+          <div>
+            <div style="color:#555;font-size:10px">Port</div>
+            <div style="background:#fff;border:1px solid #aaa;padding:3px 6px;color:#003b6f">1394</div>
+          </div>
+          <div>
+            <div style="color:#555;font-size:10px">Protocol</div>
+            <div style="background:#fff;border:1px solid #aaa;padding:3px 6px;color:#003b6f">Raw Socket</div>
+          </div>
+          <div>
+            <div style="color:#555;font-size:10px">Status</div>
+            <div style="background:#fff;border:1px solid #aaa;padding:3px 6px;color:#228b22">✓ Connected</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;margin-bottom:8px">
+          <div style="background:#e8e8e8;border:1px solid #999;padding:3px 10px;border-radius:2px;cursor:pointer;font-size:10px">Open VISA Test Panel</div>
+          <div style="background:#e8e8e8;border:1px solid #999;padding:3px 10px;border-radius:2px;cursor:pointer;font-size:10px">Reset Device</div>
+        </div>
+        <div style="font-size:10px;color:#555;margin-bottom:4px">Send command → <span style="background:#e8f0ff;padding:1px 6px;color:#003b6f">*IDN?</span> then press Query</div>
+        <div class="nimax-idn-box">KEITHLEY INSTRUMENTS INC.,MODEL 6221,4098765,1.40</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="annotation-grid">
+    <div class="annotation">
+      <div class="annotation-title">📍 How to Add Network Device</div>
+      <p>In NI-MAX: <b>Devices and Interfaces → Network Devices → Add Network Device → VISA TCP/IP Resource → Manual Entry</b><br><br>Enter IP: <code>192.168.0.2</code> and Port: <code>1394</code>, select <b>Raw Socket</b></p>
+    </div>
+    <div class="annotation warn">
+      <div class="annotation-title">⚠️ If IDN? fails</div>
+      <p>On the K6221 front panel:<br>Press <b>COMM</b> → select <b>LAN</b> → verify <b>Status = Enabled</b><br><br>Also check that your PC and K6221 are on the same subnet (<code>192.168.0.x</code>)</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────── STEP 1: Python Script ─────────────────── -->
+<div class="step" id="step1">
+  <div class="step-header">
+    <div class="step-num">2</div>
+    <div>
+      <div class="step-title">Add Functions to check_run_2.py</div>
+      <div class="step-subtitle">LabVIEW Python Node needs callable functions — add these at the bottom of your file</div>
+    </div>
+  </div>
+
+  <div class="annotation warn" style="margin-bottom:16px">
+    <div class="annotation-title">⚠️ Don't delete anything from your original script</div>
+    <p>Just <b>add the code below to the bottom</b> of <code>check_run_2.py</code>. Keep all your existing code exactly as it is.</p>
+  </div>
+
+  <div class="code-block">
+<span class="cm"># ─────────────────────────────────────────────</span>
+<span class="cm"># ADD THESE FUNCTIONS AT THE BOTTOM OF check_run_2.py</span>
+<span class="cm"># ─────────────────────────────────────────────</span>
+
+<span class="kw">def</span> <span class="fn">run_waveform</span>(<span class="var">amp_mA</span>=<span class="num">1.0</span>, <span class="var">comp_V</span>=<span class="num">2.52</span>, <span class="var">freq_Hz</span>=<span class="num">7.0</span>,
+                 <span class="var">wave</span>=<span class="str">"SIN"</span>, <span class="var">marker_enable</span>=<span class="num">False</span>, <span class="var">marker_angle</span>=<span class="num">0.0</span>):
+    <span class="cm">"""Called directly from LabVIEW Python Node"""</span>
+    <span class="var">amp_A</span> = <span class="fn">float</span>(<span class="var">amp_mA</span>) * <span class="num">1e-3</span>   <span class="cm"># mA → A  ← IMPORTANT!</span>
+    <span class="kw">import</span> pyvisa
+    <span class="var">rm</span> = pyvisa.<span class="fn">ResourceManager</span>(<span class="str">"@ivi"</span>)
+    <span class="var">inst</span> = <span class="num">None</span>
+    <span class="kw">try</span>:
+        <span class="var">inst</span> = <span class="var">rm</span>.<span class="fn">open_resource</span>(<span class="var">RESOURCE</span>)
+        <span class="var">inst</span>.timeout = <span class="num">10000</span>
+        <span class="var">inst</span>.read_termination = <span class="str">"\n"</span>
+        <span class="var">inst</span>.write_termination = <span class="str">"\n"</span>
+        <span class="var">idn</span> = <span class="var">inst</span>.<span class="fn">query</span>(<span class="str">"*IDN?"</span>)
+        <span class="fn">safe_stop</span>(<span class="var">inst</span>)
+        <span class="var">inst</span>.<span class="fn">write</span>(<span class="str">"SOUR:FUNC CURR"</span>)
+        <span class="var">inst</span>.<span class="fn">write</span>(<span class="str">"SOUR:CURR:COMP {:.6f}"</span>.<span class="fn">format</span>(<span class="fn">float</span>(<span class="var">comp_V</span>)))
+        <span class="var">inst</span>.<span class="fn">write</span>(<span class="str">"SOUR:WAVE:FUNC {}"</span>.<span class="fn">format</span>(<span class="var">wave</span>))
+        <span class="var">inst</span>.<span class="fn">write</span>(<span class="str">"SOUR:WAVE:FREQ {:.6f}"</span>.<span class="fn">format</span>(<span class="fn">float</span>(<span class="var">freq_Hz</span>)))
+        <span class="var">inst</span>.<span class="fn">write</span>(<span class="str">"SOUR:WAVE:AMPL {:.12f}"</span>.<span class="fn">format</span>(<span class="var">amp_A</span>))
+        <span class="var">inst</span>.<span class="fn">write</span>(<span class="str">"SOUR:WAVE:OFFS 0"</span>)
+        <span class="kw">if</span> <span class="var">marker_enable</span>:
+            <span class="var">inst</span>.<span class="fn">write</span>(<span class="str">"SOUR:WAVE:PMAR:STAT ON"</span>)
+            <span class="var">inst</span>.<span class="fn">write</span>(<span class="str">"SOUR:WAVE:PMAR:LEV {:.2f}"</span>.<span class="fn">format</span>(<span class="fn">float</span>(<span class="var">marker_angle</span>)))
+        <span class="kw">else</span>:
+            <span class="var">inst</span>.<span class="fn">write</span>(<span class="str">"SOUR:WAVE:PMAR:STAT OFF"</span>)
+        <span class="var">inst</span>.<span class="fn">write</span>(<span class="str">"OUTP ON"</span>)
+        <span class="var">inst</span>.<span class="fn">write</span>(<span class="str">"SOUR:WAVE:ARM"</span>)
+        <span class="var">inst</span>.<span class="fn">write</span>(<span class="str">"SOUR:WAVE:INIT"</span>)
+        <span class="kw">return</span> <span class="str">"OK: {} {}Hz {}mA IDN={}"</span>.<span class="fn">format</span>(<span class="var">wave</span>, <span class="var">freq_Hz</span>, <span class="var">amp_mA</span>, <span class="var">idn</span>.<span class="fn">strip</span>())
+    <span class="kw">except</span> Exception <span class="kw">as</span> <span class="var">e</span>:
+        <span class="kw">return</span> <span class="str">"ERROR: {}"</span>.<span class="fn">format</span>(<span class="fn">str</span>(<span class="var">e</span>))
+    <span class="kw">finally</span>:
+        <span class="kw">if</span> <span class="var">inst</span>: <span class="var">inst</span>.<span class="fn">close</span>()
+        <span class="var">rm</span>.<span class="fn">close</span>()
+
+<span class="kw">def</span> <span class="fn">stop_waveform</span>():
+    <span class="cm">"""Called from LabVIEW STOP button"""</span>
+    <span class="kw">import</span> pyvisa
+    <span class="var">rm</span> = pyvisa.<span class="fn">ResourceManager</span>(<span class="str">"@ivi"</span>)
+    <span class="kw">try</span>:
+        <span class="var">inst</span> = <span class="var">rm</span>.<span class="fn">open_resource</span>(<span class="var">RESOURCE</span>)
+        <span class="var">inst</span>.timeout = <span class="num">5000</span>
+        <span class="var">inst</span>.read_termination = <span class="str">"\n"</span>
+        <span class="var">inst</span>.write_termination = <span class="str">"\n"</span>
+        <span class="fn">safe_stop</span>(<span class="var">inst</span>)
+        <span class="var">inst</span>.<span class="fn">close</span>()
+        <span class="kw">return</span> <span class="str">"Stopped OK"</span>
+    <span class="kw">except</span> Exception <span class="kw">as</span> <span class="var">e</span>:
+        <span class="kw">return</span> <span class="str">"Stop ERROR: {}"</span>.<span class="fn">format</span>(<span class="fn">str</span>(<span class="var">e</span>))
+    <span class="kw">finally</span>:
+        <span class="var">rm</span>.<span class="fn">close</span>()
+  </div>
+
+  <div class="annotation success">
+    <div class="annotation-title">✅ Save the file then test it</div>
+    <p>Open Command Prompt and run:<br><code>python -c "import check_run_2; print('OK')"</code><br><br>If it prints OK with no errors, the file is ready for LabVIEW.</p>
+  </div>
+</div>
+
+<!-- ─────────────────── STEP 2: FRONT PANEL ─────────────────── -->
+<div class="step" id="step2">
+  <div class="step-header">
+    <div class="step-num">3</div>
+    <div>
+      <div class="step-title">Build the Front Panel</div>
+      <div class="step-subtitle">This is what your LabVIEW front panel should look like</div>
+    </div>
+  </div>
+
+  <div class="lv-window">
+    <div class="lv-titlebar">
+      <span>⚡</span>
+      <span>K6221_Python_Controller.vi Front Panel</span>
+      <div class="lv-titlebar-btns">
+        <div class="lv-btn lv-btn-close"></div>
+        <div class="lv-btn lv-btn-min"></div>
+        <div class="lv-btn lv-btn-max"></div>
+      </div>
+    </div>
+    <div class="lv-toolbar">
+      <div class="lv-tool active">▶ Run</div>
+      <div class="lv-tool">⏹ Stop</div>
+      <div class="lv-tool">🔧 Edit</div>
+      <div class="lv-tool">⚙️ Tools</div>
+    </div>
+    <div class="lv-fp">
+      <div class="lv-fp-grid">
+
+        <!-- Waveform Settings -->
+        <div class="lv-cluster">
+          <div class="lv-cluster-title">Waveform Settings</div>
+          <div class="lv-control">
+            <div class="lv-label">Amplitude (mA)</div>
+            <div class="lv-numeric">1.000</div>
+          </div>
+          <div class="lv-control">
+            <div class="lv-label">Compliance (V)</div>
+            <div class="lv-numeric">2.520</div>
+          </div>
+          <div class="lv-control">
+            <div class="lv-label">Frequency (Hz)</div>
+            <div class="lv-numeric">7.000</div>
+          </div>
+          <div class="lv-control">
+            <div class="lv-label">DC Offset (A)</div>
+            <div class="lv-numeric">0.000</div>
+          </div>
+          <div class="lv-control">
+            <div class="lv-label">Waveform</div>
+            <div class="lv-enum-ctrl"><span>SIN</span><span>▼</span></div>
+          </div>
+        </div>
+
+        <!-- Status / Run -->
+        <div class="lv-cluster">
+          <div class="lv-cluster-title">Status &amp; Control</div>
+          <div class="lv-control">
+            <div class="lv-label">Status</div>
+            <div class="lv-indicator">OK: SIN 7Hz 1mA</div>
+          </div>
+          <div class="lv-control">
+            <div class="lv-label">Instrument ID</div>
+            <div class="lv-indicator">KEITHLEY 6221</div>
+          </div>
+          <div class="lv-control" style="margin-top:8px">
+            <div class="lv-label">Running</div>
+            <div class="lv-led green"></div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:12px">
+            <div class="lv-button run">RUN</div>
+            <div class="lv-button stop">STOP</div>
+          </div>
+        </div>
+
+        <!-- Phase Marker -->
+        <div class="lv-cluster">
+          <div class="lv-cluster-title">Phase Marker</div>
+          <div class="lv-control">
+            <div class="lv-label">Enable</div>
+            <div class="lv-led orange"></div>
+          </div>
+          <div class="lv-control">
+            <div class="lv-label">Angle (deg)</div>
+            <div class="lv-numeric">0.000</div>
+          </div>
+          <div style="font-size:9px;color:#777;margin-top:6px">TTL pulse output on BNC2<br>at specified phase angle</div>
+        </div>
+
+        <!-- Python Info -->
+        <div class="lv-cluster">
+          <div class="lv-cluster-title">Python Session</div>
+          <div class="lv-control">
+            <div class="lv-label">Python Version</div>
+            <div class="lv-string-ctrl">3.6</div>
+          </div>
+          <div class="lv-control">
+            <div class="lv-label">Session Active</div>
+            <div class="lv-led green"></div>
+          </div>
+          <div style="font-size:9px;color:#777;margin-top:6px">Session opens at VI start<br>Closes when VI stops</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="annotation-grid">
+    <div class="annotation">
+      <div class="annotation-title">📋 How to add each control</div>
+      <p>Right-click the Front Panel → <b>Controls → Modern → Numeric → Numeric Control</b> for number inputs<br><br>Right-click → <b>Controls → Modern → Ring &amp; Enum → Enum</b> for the waveform selector<br><br>Right-click → <b>Controls → Modern → Boolean → OK Button</b> for RUN/STOP</p>
+    </div>
+    <div class="annotation warn">
+      <div class="annotation-title">⚠️ Label each control exactly</div>
+      <p>The label you give controls becomes their name in the Block Diagram. Use the same names shown here to follow this guide easily.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────── STEP 3: BLOCK DIAGRAM OVERVIEW ─────────────────── -->
+<div class="step" id="step3">
+  <div class="step-header">
+    <div class="step-num">4</div>
+    <div>
+      <div class="step-title">Block Diagram Overview</div>
+      <div class="step-subtitle">The overall structure — State Machine inside a While Loop</div>
+    </div>
+  </div>
+
+  <div class="flow">
+    <div class="flow-box init">OPEN<br>SESSION</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="border-color:#888">While Loop<br>starts</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box active-state">RUN<br>pressed?</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box active-state">Call<br>run_waveform</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box active-state">Show<br>Status</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box stop-state">STOP<br>pressed?</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box stop-state">Call<br>stop_waveform</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box init">CLOSE<br>SESSION</div>
+  </div>
+
+  <div class="lv-window">
+    <div class="lv-titlebar">
+      <span>⬛</span>
+      <span>K6221_Python_Controller.vi Block Diagram</span>
+      <div class="lv-titlebar-btns">
+        <div class="lv-btn lv-btn-close"></div>
+        <div class="lv-btn lv-btn-min"></div>
+        <div class="lv-btn lv-btn-max"></div>
+      </div>
+    </div>
+    <div class="lv-bd">
+      <svg class="bd-svg" viewBox="0 0 900 480">
+        <!-- Background labels -->
+        <text x="10" y="20" font-family="JetBrains Mono" font-size="10" fill="#888">Block Diagram — K6221_Python_Controller.vi</text>
+
+        <!-- OUTSIDE WHILE LOOP: Open Python Session -->
+        <rect x="20" y="40" width="110" height="50" rx="4" fill="#a8d8f0" stroke="#2266aa" stroke-width="2"/>
+        <text x="75" y="60" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#003" font-weight="bold">Open Python</text>
+        <text x="75" y="73" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#003">Session</text>
+        <text x="75" y="86" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#555">version: "3.6"</text>
+
+        <!-- wire from OpenSession to While Loop border (shift register) -->
+        <line x1="130" y1="65" x2="165" y2="65" stroke="#e87722" stroke-width="3"/>
+        <circle cx="133" cy="65" r="3" fill="#e87722"/>
+
+        <!-- WHILE LOOP border -->
+        <rect x="165" y="30" width="640" height="400" rx="4" fill="none" stroke="#004488" stroke-width="2" stroke-dasharray="6,3"/>
+        <text x="175" y="44" font-family="JetBrains Mono" font-size="9" fill="#004488">While Loop</text>
+
+        <!-- Shift register left (session in) -->
+        <rect x="165" y="55" width="14" height="20" fill="#e87722" stroke="#aa4400" stroke-width="1"/>
+        <text x="172" y="68" text-anchor="middle" font-family="JetBrains Mono" font-size="7" fill="white">SR</text>
+
+        <!-- Shift register right (session out) -->
+        <rect x="791" y="55" width="14" height="20" fill="#e87722" stroke="#aa4400" stroke-width="1"/>
+        <text x="798" y="68" text-anchor="middle" font-family="JetBrains Mono" font-size="7" fill="white">SR</text>
+
+        <!-- wire SR left → Case Structure -->
+        <line x1="179" y1="65" x2="240" y2="65" stroke="#e87722" stroke-width="3"/>
+
+        <!-- CASE STRUCTURE (outer: RUN button) -->
+        <rect x="240" y="50" width="540" height="360" rx="3" fill="#f8f8e8" stroke="#888844" stroke-width="2"/>
+        <rect x="240" y="50" width="120" height="18" rx="2" fill="#cccc88" stroke="#888844"/>
+        <text x="300" y="62" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#333" font-weight="bold">Case: RUN button [T/F]</text>
+
+        <!-- TRUE CASE contents -->
+        <!-- String Array constant -->
+        <rect x="260" y="80" width="80" height="55" rx="2" fill="#ffffa0" stroke="#888" stroke-width="1"/>
+        <text x="300" y="95" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#333" font-weight="bold">String</text>
+        <text x="300" y="107" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#003b6f">Array</text>
+        <text x="268" y="119" font-family="JetBrains Mono" font-size="7" fill="#333">"SIN","SQU"</text>
+        <text x="268" y="129" font-family="JetBrains Mono" font-size="7" fill="#333">"RAMP","TRI"</text>
+
+        <!-- Index Array -->
+        <rect x="355" y="88" width="55" height="35" rx="2" fill="#a8e8a8" stroke="#228822" stroke-width="1"/>
+        <text x="382" y="104" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#003300" font-weight="bold">Index</text>
+        <text x="382" y="116" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#003300">Array</text>
+
+        <!-- wire array → index array -->
+        <line x1="340" y1="100" x2="355" y2="100" stroke="#ff8c00" stroke-width="2"/>
+        <!-- Waveform Enum control terminal -->
+        <rect x="260" y="150" width="70" height="20" rx="2" fill="#d0e8ff" stroke="#4488cc" stroke-width="1"/>
+        <text x="295" y="163" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#003b6f">Waveform</text>
+        <!-- wire enum → index -->
+        <polyline points="330,160 345,160 345,116 355,116" fill="none" stroke="#2060c0" stroke-width="2"/>
+
+        <!-- Python Node (run_waveform) -->
+        <rect x="425" y="70" width="130" height="200" rx="4" fill="#f0e0b8" stroke="#cc8800" stroke-width="2"/>
+        <text x="490" y="88" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#333" font-weight="bold">Python Node</text>
+        <text x="490" y="100" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#555">run_waveform()</text>
+        <line x1="425" y1="108" x2="555" y2="108" stroke="#cc8800" stroke-width="1" stroke-dasharray="3,2"/>
+        <!-- input labels -->
+        <text x="430" y="122" font-family="JetBrains Mono" font-size="7" fill="#333">amp_mA ●</text>
+        <text x="430" y="137" font-family="JetBrains Mono" font-size="7" fill="#333">comp_V ●</text>
+        <text x="430" y="152" font-family="JetBrains Mono" font-size="7" fill="#333">freq_Hz ●</text>
+        <text x="430" y="167" font-family="JetBrains Mono" font-size="7" fill="#333">wave ●</text>
+        <text x="430" y="182" font-family="JetBrains Mono" font-size="7" fill="#333">marker_en ●</text>
+        <text x="430" y="197" font-family="JetBrains Mono" font-size="7" fill="#333">marker_ang ●</text>
+        <!-- output label -->
+        <line x1="425" y1="218" x2="555" y2="218" stroke="#cc8800" stroke-width="1" stroke-dasharray="3,2"/>
+        <text x="460" y="235" font-family="JetBrains Mono" font-size="7" fill="#333">● return (string)</text>
+
+        <!-- wire from IndexArray output → wave input of PythonNode -->
+        <polyline points="410,100 418,100 418,167 425,167" fill="none" stroke="#ff8c00" stroke-width="2"/>
+
+        <!-- Input control terminals on left -->
+        <rect x="260" y="180" width="70" height="15" rx="2" fill="#d0e8ff" stroke="#4488cc" stroke-width="1"/>
+        <text x="295" y="191" text-anchor="middle" font-family="JetBrains Mono" font-size="7" fill="#003b6f">Amplitude(mA)</text>
+        <line x1="330" y1="187" x2="425" y2="122" stroke="#2060c0" stroke-width="1.5"/>
+
+        <rect x="260" y="200" width="70" height="15" rx="2" fill="#d0e8ff" stroke="#4488cc" stroke-width="1"/>
+        <text x="295" y="211" text-anchor="middle" font-family="JetBrains Mono" font-size="7" fill="#003b6f">Compliance(V)</text>
+        <line x1="330" y1="207" x2="425" y2="137" stroke="#2060c0" stroke-width="1.5"/>
+
+        <rect x="260" y="220" width="70" height="15" rx="2" fill="#d0e8ff" stroke="#4488cc" stroke-width="1"/>
+        <text x="295" y="231" text-anchor="middle" font-family="JetBrains Mono" font-size="7" fill="#003b6f">Frequency(Hz)</text>
+        <line x1="330" y1="227" x2="425" y2="152" stroke="#2060c0" stroke-width="1.5"/>
+
+        <rect x="260" y="240" width="70" height="15" rx="2" fill="#d0e8ff" stroke="#4488cc" stroke-width="1"/>
+        <text x="295" y="251" text-anchor="middle" font-family="JetBrains Mono" font-size="7" fill="#003b6f">Marker Enable</text>
+        <line x1="330" y1="247" x2="425" y2="182" stroke="#2060c0" stroke-width="1.5"/>
+
+        <rect x="260" y="260" width="70" height="15" rx="2" fill="#d0e8ff" stroke="#4488cc" stroke-width="1"/>
+        <text x="295" y="271" text-anchor="middle" font-family="JetBrains Mono" font-size="7" fill="#003b6f">Marker Angle</text>
+        <line x1="330" y1="267" x2="425" y2="197" stroke="#2060c0" stroke-width="1.5"/>
+
+        <!-- wire Session SR → PythonNode session terminal (top) -->
+        <polyline points="179,65 210,65 210,75 425,75" fill="none" stroke="#e87722" stroke-width="2.5"/>
+
+        <!-- output wire from Python Node → Status indicator -->
+        <line x1="555" y1="235" x2="610" y2="235" stroke="#228b22" stroke-width="2"/>
+        <rect x="610" y="225" width="70" height="18" rx="2" fill="#1a1a3a" stroke="#228b22" stroke-width="1"/>
+        <text x="645" y="237" text-anchor="middle" font-family="JetBrains Mono" font-size="7" fill="#88ff88">Status</text>
+
+        <!-- STOP button (below case structure) -->
+        <rect x="260" y="330" width="65" height="20" rx="2" fill="#ffcccc" stroke="#cc4444" stroke-width="1.5"/>
+        <text x="292" y="343" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#aa0000" font-weight="bold">STOP btn</text>
+
+        <!-- stop_waveform python node (small) -->
+        <rect x="355" y="320" width="100" height="40" rx="3" fill="#f0e0b8" stroke="#cc8800" stroke-width="1.5"/>
+        <text x="405" y="337" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#333" font-weight="bold">Python Node</text>
+        <text x="405" y="350" text-anchor="middle" font-family="JetBrains Mono" font-size="7.5" fill="#555">stop_waveform()</text>
+        <line x1="325" y1="340" x2="355" y2="340" stroke="#cc4444" stroke-width="2"/>
+
+        <!-- wire from loop border (STOP) -->
+        <line x1="455" y1="340" x2="510" y2="340" stroke="#228b22" stroke-width="2"/>
+        <rect x="510" y="332" width="70" height="18" rx="2" fill="#1a1a3a" stroke="#228b22" stroke-width="1"/>
+        <text x="545" y="344" text-anchor="middle" font-family="JetBrains Mono" font-size="7" fill="#88ff88">Status</text>
+
+        <!-- While loop stop terminal -->
+        <rect x="791" y="405" width="14" height="14" rx="2" fill="#cc4444"/>
+        <text x="798" y="415" text-anchor="middle" font-family="JetBrains Mono" font-size="7" fill="white">⏹</text>
+        <rect x="730" y="400" width="55" height="18" rx="2" fill="#ffcccc" stroke="#cc4444" stroke-width="1"/>
+        <text x="757" y="412" text-anchor="middle" font-family="JetBrains Mono" font-size="7" fill="#aa0000">STOP button</text>
+        <line x1="785" y1="409" x2="791" y2="412" stroke="#cc4444" stroke-width="1.5"/>
+
+        <!-- SR right border wire out -->
+        <line x1="791" y1="65" x2="820" y2="65" stroke="#e87722" stroke-width="3"/>
+
+        <!-- OUTSIDE: Close Python Session -->
+        <rect x="820" y="40" width="65" height="50" rx="4" fill="#a8d8f0" stroke="#2266aa" stroke-width="2"/>
+        <text x="852" y="60" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#003" font-weight="bold">Close</text>
+        <text x="852" y="72" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#003">Python</text>
+        <text x="852" y="84" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#003">Session</text>
+      </svg>
+    </div>
+  </div>
+
+  <div class="wire-legend">
+    <div class="wire-item"><div class="wire-line" style="background:#e87722"></div>Python Session refnum (orange)</div>
+    <div class="wire-item"><div class="wire-line" style="background:#2060c0"></div>DBL numeric data (blue)</div>
+    <div class="wire-item"><div class="wire-line" style="background:#228b22"></div>String data (green)</div>
+    <div class="wire-item"><div class="wire-line" style="background:#cc4444"></div>Boolean (red)</div>
+    <div class="wire-item"><div class="wire-line" style="background:#ff8c00"></div>Enum / array index (orange)</div>
+  </div>
+</div>
+
+<!-- ─────────────────── STEP 4: PYTHON NODE CONFIG ─────────────────── -->
+<div class="step" id="step4">
+  <div class="step-header">
+    <div class="step-num">5</div>
+    <div>
+      <div class="step-title">Configure the Python Node</div>
+      <div class="step-subtitle">Right-click the Python Node to set module path and function name</div>
+    </div>
+  </div>
+
+  <div class="lv-window">
+    <div class="lv-titlebar"><span>Configure Python Node</span></div>
+    <div class="lv-bd" style="min-height:300px;padding:20px">
+      <!-- Python Node zoomed in -->
+      <div style="display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap">
+
+        <!-- Right-click menu mockup -->
+        <div style="background:#f5f5f5;border:1px solid #999;font-family:JetBrains Mono,monospace;font-size:11px;color:#222;min-width:200px;box-shadow:2px 2px 6px rgba(0,0,0,0.2)">
+          <div style="background:#3377cc;color:white;padding:4px 10px;font-size:10px;font-weight:700">Right-click → Python Node</div>
+          <div style="padding:3px 14px;cursor:pointer;border-bottom:1px solid #ddd" onmouseover="this.style.background='#d8e8f8'" onmouseout="this.style.background=''">Help</div>
+          <div style="padding:3px 14px;cursor:pointer;border-bottom:1px solid #ddd" onmouseover="this.style.background='#d8e8f8'" onmouseout="this.style.background=''">Description and Tip...</div>
+          <div style="padding:3px 14px;cursor:pointer;border-bottom:1px solid #eee;background:#fff0cc;font-weight:700" onmouseover="this.style.background='#ffe080'" onmouseout="this.style.background='#fff0cc'">📁 Browse for Module Path</div>
+          <div style="padding:3px 14px;cursor:pointer;border-bottom:1px solid #eee;background:#fff0cc;font-weight:700" onmouseover="this.style.background='#ffe080'" onmouseout="this.style.background='#fff0cc'">✏️ Set Function Name</div>
+          <div style="padding:3px 14px;cursor:pointer;border-bottom:1px solid #ddd" onmouseover="this.style.background='#d8e8f8'" onmouseout="this.style.background=''">Add Input</div>
+          <div style="padding:3px 14px;cursor:pointer;border-bottom:1px solid #ddd" onmouseover="this.style.background='#d8e8f8'" onmouseout="this.style.background=''">Add Output</div>
+          <div style="padding:3px 14px;cursor:pointer" onmouseover="this.style.background='#d8e8f8'" onmouseout="this.style.background=''">Remove Input</div>
+        </div>
+
+        <!-- Set Function name dialog -->
+        <div style="background:#e8e8e8;border:2px solid #999;font-family:JetBrains Mono,monospace;font-size:11px;min-width:280px;box-shadow:3px 3px 8px rgba(0,0,0,0.3)">
+          <div style="background:linear-gradient(180deg,#4488cc,#2266aa);color:white;padding:5px 10px;font-weight:700">Set Function Name</div>
+          <div style="padding:14px">
+            <div style="margin-bottom:10px">
+              <div style="font-size:10px;color:#555;margin-bottom:3px">Module Path:</div>
+              <div style="background:#fff;border:1px solid #888;padding:4px 6px;color:#003b6f;font-size:10px">C:\Users\YourName\Desktop\check_run_2.py</div>
+            </div>
+            <div style="margin-bottom:14px">
+              <div style="font-size:10px;color:#555;margin-bottom:3px">Function Name:</div>
+              <div style="background:#ffffd0;border:2px solid #cc8800;padding:4px 6px;color:#333;font-size:11px;font-weight:700">run_waveform</div>
+            </div>
+            <div style="display:flex;gap:6px;justify-content:flex-end">
+              <div style="background:#d0d0d0;border:1px solid #999;padding:3px 14px;border-radius:2px;cursor:pointer">Cancel</div>
+              <div style="background:#3377cc;color:white;border:1px solid #2266aa;padding:3px 14px;border-radius:2px;cursor:pointer">OK</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Python Node result -->
+        <div>
+          <div style="font-family:JetBrains Mono,monospace;font-size:10px;color:#555;margin-bottom:6px">Configured Python Node looks like:</div>
+          <div style="background:#f0e0b8;border:2px solid #cc8800;border-radius:4px;padding:10px;font-family:JetBrains Mono,monospace;font-size:10px;min-width:160px">
+            <div style="font-weight:700;text-align:center;border-bottom:1px dashed #cc8800;padding-bottom:4px;margin-bottom:6px">Python Node</div>
+            <div style="font-size:9px;text-align:center;color:#555;margin-bottom:6px">run_waveform()</div>
+            <div style="font-size:9px;color:#333">● amp_mA</div>
+            <div style="font-size:9px;color:#333">● comp_V</div>
+            <div style="font-size:9px;color:#333">● freq_Hz</div>
+            <div style="font-size:9px;color:#333">● wave</div>
+            <div style="font-size:9px;color:#333">● marker_enable</div>
+            <div style="font-size:9px;color:#333;border-bottom:1px dashed #cc8800;padding-bottom:4px;margin-bottom:4px">● marker_angle</div>
+            <div style="font-size:9px;color:#333">return ●</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="annotation-grid">
+    <div class="annotation">
+      <div class="annotation-title">📍 Exact steps</div>
+      <p>1. Place Python Node on Block Diagram<br>2. Right-click → <b>Browse for Module Path</b> → navigate to <code>check_run_2.py</code><br>3. Right-click → <b>Set Function Name</b> → type <code>run_waveform</code><br>4. Right-click border → <b>Add Input</b> × 6 times<br>5. Right-click border → <b>Add Output</b> × 1 time</p>
+    </div>
+    <div class="annotation warn">
+      <div class="annotation-title">⚠️ Name each input terminal</div>
+      <p>Double-click each input terminal label and type the exact parameter name: <code>amp_mA</code>, <code>comp_V</code>, <code>freq_Hz</code>, <code>wave</code>, <code>marker_enable</code>, <code>marker_angle</code><br><br>These must match the Python function parameter names exactly!</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────── STEP 5: WIRE IT UP ─────────────────── -->
+<div class="step" id="step5">
+  <div class="step-header">
+    <div class="step-num">6</div>
+    <div>
+      <div class="step-title">Wire Everything Together</div>
+      <div class="step-subtitle">Connect Front Panel controls to the Python Node inputs</div>
+    </div>
+  </div>
+
+  <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:20px;margin:16px 0">
+    <h3 style="margin-top:0">Wiring Table — Each control to its Python Node input</h3>
+    <table style="width:100%;border-collapse:collapse;font-size:13px;margin-top:12px">
+      <tr style="background:var(--surface)">
+        <th style="padding:8px 12px;text-align:left;border:1px solid var(--border);color:var(--accent)">Front Panel Control</th>
+        <th style="padding:8px 12px;text-align:left;border:1px solid var(--border);color:var(--accent)">Wire to Python Node input</th>
+        <th style="padding:8px 12px;text-align:left;border:1px solid var(--border);color:var(--accent)">Wire Color</th>
+        <th style="padding:8px 12px;text-align:left;border:1px solid var(--border);color:var(--accent)">Note</th>
+      </tr>
+      <tr>
+        <td style="padding:7px 12px;border:1px solid var(--border);font-family:JetBrains Mono,monospace;font-size:12px">Amplitude (mA)</td>
+        <td style="padding:7px 12px;border:1px solid var(--border);color:var(--accent2)">amp_mA</td>
+        <td style="padding:7px 12px;border:1px solid var(--border);color:var(--muted)">🔵 Blue (DBL)</td>
+        <td style="padding:7px 12px;border:1px solid var(--border);color:var(--muted)">Python converts mA→A internally</td>
+      </tr>
+      <tr style="background:var(--surface)">
+        <td style="padding:7px 12px;border:1px solid var(--border);font-family:JetBrains Mono,monospace;font-size:12px">Compliance (V)</td>
+        <td style="padding:7px 12px;border:1px solid var(--border);color:var(--accent2)">comp_V</td>
+        <td style="padding:7px 12px;border:1px solid var(--border);color:var(--muted)">🔵 Blue (DBL)</td>
+        <td style="padding:7px 12px;border:1px solid var(--border);color:var(--muted)">Direct wire</td>
+      </tr>
+      <tr>
+        <td style="padding:7px 12px;border:1px solid var(--border);font-family:JetBrains Mono,monospace;font-size:12px">Frequency (Hz)</td>
+        <td style="padding:7px 12px;border:1px solid var(--border);color:var(--accent2)">freq_Hz</td>
+        <td style="padding:7px 12px;border:1px solid var(--border);color:var(--muted)">🔵 Blue (DBL)</td>
+        <td style="padding:7px 12px;border:1px solid var(--border);color:var(--muted)">Direct wire</td>
+      </tr>
+      <tr style="background:var(--surface)">
+        <td style="padding:7px 12px;border:1px solid var(--border);font-family:JetBrains Mono,monospace;font-size:12px">Waveform (Enum)</td>
+        <td style="padding:7px 12px;border:1px solid var(--border);color:var(--accent2)">wave</td>
+        <td style="padding:7px 12px;border:1px solid var(--border);color:var(--muted)">🟠 Orange (string)</td>
+        <td style="padding:7px 12px;border:1px solid var(--border);color:var(--muted)">Enum → Index Array → String Array → wave input</td>
+      </tr>
+      <tr>
+        <td style="padding:7px 12px;border:1px solid var(--border);font-family:JetBrains Mono,monospace;font-size:12px">Phase Marker Enable</td>
+        <td style="padding:7px 12px;border:1px solid var(--border);color:var(--accent2)">marker_enable</td>
+        <td style="padding:7px 12px;border:1px solid var(--border);color:var(--muted)">🟢 Green (bool)</td>
+        <td style="padding:7px 12px;border:1px solid var(--border);color:var(--muted)">Direct wire (boolean)</td>
+      </tr>
+      <tr style="background:var(--surface)">
+        <td style="padding:7px 12px;border:1px solid var(--border);font-family:JetBrains Mono,monospace;font-size:12px">Marker Angle (deg)</td>
+        <td style="padding:7px 12px;border:1px solid var(--border);color:var(--accent2)">marker_angle</td>
+        <td style="padding:7px 12px;border:1px solid var(--border);color:var(--muted)">🔵 Blue (DBL)</td>
+        <td style="padding:7px 12px;border:1px solid var(--border);color:var(--muted)">Direct wire</td>
+      </tr>
+      <tr>
+        <td style="padding:7px 12px;border:1px solid var(--border);font-family:JetBrains Mono,monospace;font-size:12px">Python Node return</td>
+        <td style="padding:7px 12px;border:1px solid var(--border);color:var(--accent3)">Status indicator</td>
+        <td style="padding:7px 12px;border:1px solid var(--border);color:var(--muted)">🟢 Green (string)</td>
+        <td style="padding:7px 12px;border:1px solid var(--border);color:var(--muted)">Output → String Indicator on Front Panel</td>
+      </tr>
+    </table>
+  </div>
+
+  <h3>Enum → String Conversion (for Waveform)</h3>
+  <div class="lv-window">
+    <div class="lv-titlebar"><span>Waveform Enum to String — Zoom</span></div>
+    <div class="lv-bd" style="min-height:160px">
+      <svg viewBox="0 0 600 130" style="width:100%;height:130px">
+        <!-- Waveform Enum -->
+        <rect x="20" y="30" width="90" height="30" rx="2" fill="#d0e8ff" stroke="#4488cc" stroke-width="1.5"/>
+        <text x="65" y="43" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#003b6f" font-weight="bold">Waveform</text>
+        <text x="65" y="55" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#003b6f">[Enum ctrl]</text>
+
+        <!-- arrow -->
+        <line x1="110" y1="45" x2="140" y2="45" stroke="#2060c0" stroke-width="2.5"/>
+        <polygon points="138,40 148,45 138,50" fill="#2060c0"/>
+
+        <!-- Index Array -->
+        <rect x="148" y="28" width="80" height="34" rx="2" fill="#a8e8a8" stroke="#228822" stroke-width="1.5"/>
+        <text x="188" y="43" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#003300" font-weight="bold">Index Array</div>
+        <text x="188" y="55" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#003300">node</text>
+
+        <!-- String Array constant (top) -->
+        <rect x="148" y="76" width="80" height="42" rx="2" fill="#ffffa0" stroke="#888" stroke-width="1.5"/>
+        <text x="188" y="89" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#333" font-weight="bold">String Array</text>
+        <text x="155" y="101" font-family="JetBrains Mono" font-size="8" fill="#333">"SIN","SQU"</text>
+        <text x="155" y="112" font-family="JetBrains Mono" font-size="8" fill="#333">"RAMP","TRI"</text>
+
+        <!-- wire array → index (bottom input) -->
+        <line x1="228" y1="97" x2="238" y2="97" stroke="#ff8c00" stroke-width="2"/>
+        <line x1="238" y1="97" x2="238" y2="55" stroke="#ff8c00" stroke-width="2"/>
+        <line x1="238" y1="55" x2="228" y2="55" stroke="#ff8c00" stroke-width="2"/>
+
+        <!-- arrow from Index Array output -->
+        <line x1="228" y1="45" x2="320" y2="45" stroke="#ff8c00" stroke-width="2.5"/>
+        <polygon points="318,40 328,45 318,50" fill="#ff8c00"/>
+
+        <!-- Python Node input -->
+        <rect x="328" y="28" width="120" height="80" rx="3" fill="#f0e0b8" stroke="#cc8800" stroke-width="2"/>
+        <text x="388" y="45" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#333" font-weight="bold">Python Node</text>
+        <text x="388" y="57" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#555">run_waveform()</text>
+        <line x1="328" y1="63" x2="448" y2="63" stroke="#cc8800" stroke-width="1" stroke-dasharray="3,2"/>
+        <text x="334" y="76" font-family="JetBrains Mono" font-size="8" fill="#333">amp_mA ●</text>
+        <text x="334" y="89" font-family="JetBrains Mono" font-size="8" fill="#cc6600" font-weight="bold">wave ●</text>
+        <text x="334" y="102" font-family="JetBrains Mono" font-size="8" fill="#333">freq_Hz ●</text>
+
+        <!-- label -->
+        <text x="188" y="16" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#555">Enum value (0,1,2,3) picks "SIN","SQU","RAMP","TRI"</text>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────── STEP 6: RUN & TEST ─────────────────── -->
+<div class="step" id="step6">
+  <div class="step-header">
+    <div class="step-num">7</div>
+    <div>
+      <div class="step-title">Run &amp; Test</div>
+      <div class="step-subtitle">What you should see when everything works</div>
+    </div>
+  </div>
+
+  <h3>Expected Results</h3>
+  <div class="lv-window">
+    <div class="lv-titlebar"><span>K6221_Python_Controller.vi — Running</span></div>
+    <div class="lv-fp">
+      <div class="lv-fp-grid">
+        <div class="lv-cluster">
+          <div class="lv-cluster-title">Waveform Settings</div>
+          <div class="lv-control"><div class="lv-label">Amplitude (mA)</div><div class="lv-numeric">1.000</div></div>
+          <div class="lv-control"><div class="lv-label">Compliance (V)</div><div class="lv-numeric">2.520</div></div>
+          <div class="lv-control"><div class="lv-label">Frequency (Hz)</div><div class="lv-numeric">7.000</div></div>
+          <div class="lv-control"><div class="lv-label">Waveform</div><div class="lv-enum-ctrl"><span>SIN</span><span>▼</span></div></div>
+        </div>
+        <div class="lv-cluster">
+          <div class="lv-cluster-title">Status ← You should see this</div>
+          <div class="lv-control"><div class="lv-label">Status</div><div class="lv-indicator" style="width:200px;font-size:9px">OK: SIN 7.0Hz 1.0mA Comp=2.52V IDN=KEITHLEY...</div></div>
+          <div class="lv-control" style="margin-top:8px"><div class="lv-label">Running</div><div class="lv-led green"></div></div>
+          <div style="display:flex;gap:8px;margin-top:12px">
+            <div class="lv-button run">RUN</div>
+            <div class="lv-button stop">STOP</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3>Troubleshooting Checklist</h3>
+  <div class="checklist">
+    <div class="check-item">
+      <div class="check-box" onclick="this.classList.toggle('done')"></div>
+      <div class="check-text">Python version matches LabVIEW bitness (both 32-bit or both 64-bit)</div>
+      <div class="check-tag">CRITICAL</div>
+    </div>
+    <div class="check-item">
+      <div class="check-box" onclick="this.classList.toggle('done')"></div>
+      <div class="check-text">NI-MAX shows K6221 connected, IDN? returns response</div>
+      <div class="check-tag">NETWORK</div>
+    </div>
+    <div class="check-item">
+      <div class="check-box" onclick="this.classList.toggle('done')"></div>
+      <div class="check-text">Module path in Python Node is full absolute path (e.g. C:\Users\...\check_run_2.py)</div>
+      <div class="check-tag">PATH</div>
+    </div>
+    <div class="check-item">
+      <div class="check-box" onclick="this.classList.toggle('done')"></div>
+      <div class="check-text">Function name is exactly <code style="font-family:JetBrains Mono,monospace;background:#0d1117;padding:1px 5px;border-radius:3px;color:#f0b429">run_waveform</code> (case sensitive)</div>
+      <div class="check-tag">NAME</div>
+    </div>
+    <div class="check-item">
+      <div class="check-box" onclick="this.classList.toggle('done')"></div>
+      <div class="check-text">pyvisa is installed in the same Python that LabVIEW is using</div>
+      <div class="check-tag">PYTHON</div>
+    </div>
+    <div class="check-item">
+      <div class="check-box" onclick="this.classList.toggle('done')"></div>
+      <div class="check-text">run_waveform and stop_waveform functions added to bottom of check_run_2.py</div>
+      <div class="check-tag">SCRIPT</div>
+    </div>
+    <div class="check-item">
+      <div class="check-box" onclick="this.classList.toggle('done')"></div>
+      <div class="check-text">Status indicator shows "OK: ..." (not "ERROR: ...")</div>
+      <div class="check-tag">TEST</div>
+    </div>
+  </div>
+
+  <div class="annotation-grid" style="margin-top:20px">
+    <div class="annotation error">
+      <div class="annotation-title">❌ "LabVIEW: Python version mismatch"</div>
+      <p>Check LabVIEW: <b>Help → About LabVIEW</b> — is it 32-bit or 64-bit?<br>Then install the <b>matching bitness Python</b>. They MUST match.</p>
+    </div>
+    <div class="annotation error">
+      <div class="annotation-title">❌ "Module not found" error</div>
+      <p>Use the <b>full path</b> with double backslashes:<br><code>C:\\Users\\Name\\Desktop\\check_run_2.py</code></p>
+    </div>
+    <div class="annotation error">
+      <div class="annotation-title">❌ Status shows "ERROR: VISA error"</div>
+      <p>K6221 not reachable. Re-run NI-MAX test first. Check K6221 COMM → LAN settings on the instrument front panel.</p>
+    </div>
+    <div class="annotation success">
+      <div class="annotation-title">✅ Status shows "OK: SIN 7.0Hz..."</div>
+      <p>Everything is working! The K6221 is outputting the waveform. Press STOP to safely stop the output when done.</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- end container -->
+
+<script>
+  const pills = document.querySelectorAll('.nav-pill');
+  const steps = document.querySelectorAll('.step');
+
+  function showStep(n) {
+    steps.forEach((s, i) => {
+      s.classList.toggle('active', i === n);
+    });
+    pills.forEach((p, i) => {
+      p.classList.toggle('active', i === n);
+    });
+  }
+</script>
+</body>
+</html>
